@@ -12,16 +12,13 @@ def find_edges(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return cv2.Canny(gray, 50, 150)
 
-# Convert text to binary
 def text_to_binary(text):
     return ''.join(format(ord(c), '08b') for c in text)
 
-# Convert binary to text
 def binary_to_text(binary_data):
     chars = [binary_data[i:i+8] for i in range(0, len(binary_data), 8)]
     return ''.join(chr(int(c, 2)) for c in chars).strip('\x00')
 
-# Hide message in image
 def hide(img_path, msg, pwd, save_folder):
     img = cv2.imread(img_path)
     if img is None:
@@ -31,7 +28,6 @@ def hide(img_path, msg, pwd, save_folder):
     edges = find_edges(img)
     h, w = img.shape[:2]
 
-    # Hash password and create full message with length encoding
     pwd_hash = hash_password(pwd)
     msg_len = f"{len(msg):04d}"  # Store message length as a 4-digit number
     full_msg = pwd_hash + msg_len + msg
@@ -41,19 +37,18 @@ def hide(img_path, msg, pwd, save_folder):
         messagebox.showerror("Error", "Message too long for this image.")
         return
 
-    # Embed message in edge pixels
     idx = 0
     for y in range(h):
         for x in range(w):
             if edges[y, x] > 100 and idx < len(binary_msg):
-                img[y, x, 0] = (img[y, x, 0] & 0b11111110) | int(binary_msg[idx])  # Encode bit
+                img[y, x, 0] = (img[y, x, 0] & 0b11111110) | int(binary_msg[idx]) 
                 idx += 1
 
     save_path = f"{save_folder}/encoded_image.png"
     cv2.imwrite(save_path, img)
     messagebox.showinfo("Success", f"Message hidden and saved at {save_path}")
 
-# Extract message from image
+
 def extract(img_path, pwd):
     img = cv2.imread(img_path)
     if img is None:
@@ -63,7 +58,6 @@ def extract(img_path, pwd):
     edges = find_edges(img)
     h, w = img.shape[:2]
 
-    # Extract binary message from edge pixels
     binary_msg = []
     for y in range(h):
         for x in range(w):
@@ -73,7 +67,6 @@ def extract(img_path, pwd):
     binary_msg = ''.join(binary_msg)
     extracted_text = binary_to_text(binary_msg)
 
-    # Validate password and extract message
     if len(extracted_text) >= 20:
         stored_hash, msg_len, hidden_msg = extracted_text[:16], extracted_text[16:20], extracted_text[20:]
         if stored_hash == hash_password(pwd):
@@ -84,7 +77,6 @@ def extract(img_path, pwd):
     else:
         messagebox.showerror("Error", "No hidden message found!")
 
-# GUI Class
 class StegoApp:
     def __init__(self, root):
         self.root = root
