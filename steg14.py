@@ -6,11 +6,12 @@ from tkinter import filedialog, messagebox
 from tkinterdnd2 import DND_FILES, TkinterDnD
 
 def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()[:16]  # Use first 16 chars
+    return hashlib.sha256(password.encode()).hexdigest()[:16]  
 
 def find_edges(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return cv2.Canny(gray, 50, 150)
+
 
 def text_to_binary(text):
     return ''.join(format(ord(c), '08b') for c in text)
@@ -29,7 +30,7 @@ def hide(img_path, msg, pwd, save_folder):
     h, w = img.shape[:2]
 
     pwd_hash = hash_password(pwd)
-    msg_len = f"{len(msg):04d}"  # Store message length as a 4-digit number
+    msg_len = f"{len(msg):04d}"  
     full_msg = pwd_hash + msg_len + msg
     binary_msg = text_to_binary(full_msg)
 
@@ -41,7 +42,7 @@ def hide(img_path, msg, pwd, save_folder):
     for y in range(h):
         for x in range(w):
             if edges[y, x] > 100 and idx < len(binary_msg):
-                img[y, x, 0] = (img[y, x, 0] & 0b11111110) | int(binary_msg[idx]) 
+                img[y, x, 0] = (img[y, x, 0] & 0b11111110) | int(binary_msg[idx])  
                 idx += 1
 
     save_path = f"{save_folder}/encoded_image.png"
@@ -80,7 +81,7 @@ def extract(img_path, pwd):
 class StegoApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Stego Tool with Drag-and-Drop")
+        self.root.title("Steganography Tool")
         self.root.geometry("500x500")
 
         self.tab = tk.Frame(self.root)
